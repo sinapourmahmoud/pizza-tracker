@@ -13,8 +13,8 @@ func RegisterCustomValidators(){
 
 	if v,ok := binding.Validator.Engine().(*validator.Validate); ok {
 
-		v.registerValidation("valid_pizza_type",createSliceValidator(models.PizzaTypes))
-		v.registerValidation("valid_pizza_size",createSliceValidator(models.PizzaSizes))
+		v.RegisterValidation("valid_pizza_type",createSliceValidator(models.PizzaTypes))
+		v.RegisterValidation("valid_pizza_size",createSliceValidator(models.PizzaSizes))
 
 	}
 
