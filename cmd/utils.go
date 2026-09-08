@@ -1,6 +1,7 @@
 package main
 
 import (
+	"html/template"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -18,12 +19,29 @@ func loadConfig() Config {
 	}
 }
 
-
-func getEnv(key,defaultValue string) string {
-	if value :=os.Getenv(key);value !=""{
+func getEnv(key, defaultValue string) string {
+	if value := os.Getenv(key); value != "" {
 		return value
 	}
 
 	return defaultValue
 }
 
+func loadTemplates(router *gin.Engine) error {
+
+	functions := template.FuncMap{
+
+		"add": func(a, b int) int { return a + b },
+	}
+
+	templ,err :=template.New("").Funcs(functions).ParseGlob("templates/*.tmpl")
+
+	if err !=nil{
+		return err
+	}
+
+	router.SetHTMLTemplate(templ)
+
+	return nil
+
+}
