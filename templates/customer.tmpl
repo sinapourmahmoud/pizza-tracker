@@ -15,7 +15,7 @@
 
 <body class="bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 min-h-screen">
     <div class="flex flex-col items-center p-6 md:p-8">
-        <img src="./static/pizza.svg" alt="Pizza loading..." class="w-48 h-48 mb-10 animate-spin-slow drop-shadow-lg">
+        <img src="/static/pizza.svg" alt="Pizza loading..." class="w-48 h-48 mb-10 animate-spin-slow drop-shadow-lg">
         <div id="statusContainer"
             class="bg-white/80 backdrop-blur-sm p-8 md:p-10 rounded-3xl shadow-2xl border border-white/20 max-w-3xl w-full">
             <h1 class="text-3xl md:text-4xl font-bold mb-4 text-gray-900 text-center tracking-tight">
@@ -86,3 +86,30 @@
             </div>
         </div>
     </div>
+
+    <script>
+        const statuses = {{json .Statuses}};
+        const orderId = "{{.Order.ID}}";
+
+        function updateStatusBar(currentStatus) {
+            const currentIndex = statuses.indexOf(currentStatus)
+            statuses.forEach((status, index) => {
+                const step = document.getElementById(`step${index+1}`);
+                if(index <= currentIndex) {
+                    step.classList.remove("bg-gray-300")
+                    step.classList.add("bg-emerald-500")
+                }
+            })
+
+            const progressLine = document.getElementById("progressLine");
+            const progressPercentage = Math.max(currentIndex / (statuses.length - 1 ) * 100, 5)
+            progressLine.style.background = `linear-gradient(to right, #10b981 ${progressPercentage}%, #e5e7eb ${progressPercentage}%)`;
+        }
+
+        updateStatusBar("{{.Order.Status}}")
+
+        const eventSrc = new EventSource(`/notifications?orderId=${orderId}`);
+        eventSrc.onmessage = () => location.reload();
+        eventSrc.onerror = err => console.error("EventSource failed:", err);
+    </script>
+    {{template "bottom" .}}
