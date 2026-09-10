@@ -20,7 +20,7 @@ func InitDB(dataSourceName string) (*DBModel, error) {
 
 	}
 
-	err = db.AutoMigrate(&Order{}, &OrderItem{})
+	err = db.AutoMigrate(&Order{}, &OrderItem{},&User{})
 
 	if err != nil {
 		return nil, fmt.Errorf("Failed to migrate database %v", err)
