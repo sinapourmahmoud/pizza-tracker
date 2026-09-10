@@ -10,6 +10,7 @@ import (
 type DBModel struct {
 	Order OrderModel
 	User  UserModel
+	DB    *gorm.DB
 }
 
 func InitDB(dataSourceName string) (*DBModel, error) {
@@ -20,7 +21,7 @@ func InitDB(dataSourceName string) (*DBModel, error) {
 
 	}
 
-	err = db.AutoMigrate(&Order{}, &OrderItem{},&User{})
+	err = db.AutoMigrate(&Order{}, &OrderItem{}, &User{})
 
 	if err != nil {
 		return nil, fmt.Errorf("Failed to migrate database %v", err)
@@ -29,6 +30,7 @@ func InitDB(dataSourceName string) (*DBModel, error) {
 	dbModel := &DBModel{
 		Order: OrderModel{DB: db},
 		User:  UserModel{DB: db},
+		DB:db,
 	}
 	return dbModel, nil
 
