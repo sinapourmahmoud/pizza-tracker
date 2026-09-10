@@ -67,10 +67,36 @@ func (oi *OrderItem) BeforeCreate(tx *gorm.DB) error {
 func (o *OrderModel) CreateOrder(order *Order) error {
 	return o.DB.Create(order).Error
 }
+
 func (o *OrderModel) GetOrder(id string) (*Order, error) {
 	var order Order
 	err := o.DB.Preload("Items").First(&order, "id = ?", id).Error
 
 	return &order, err
+
+}
+
+func (o *OrderModel) GetAllOrders() ([]Order, error) {
+
+	var orders []Order
+
+	err := o.DB.Preload("Items").Order("created_at desc").Find(&orders).Error
+
+	return orders, err
+
+}
+
+func (o *OrderModel) UpdateOrderStatus(id, status string) error {
+
+	return o.DB.Model(&Order{}).Where("id = ?", id).Update("status", status).Error
+
+}
+
+func (o *OrderModel) DeleteOrder(id string) error {
+
+	return o.DB.Select("Items").Delete(&Order{ID: id}).Error
+
+	
+
 
 }

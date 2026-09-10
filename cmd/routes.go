@@ -22,6 +22,8 @@ func setupRoutes(router *gin.Engine, h *Handler, store sessions.Store) {
 	{
 
 		admin.GET("", h.ServeAdminDashboard)
+		admin.POST("/order/:id/update", h.HandleOrderPut)
+		admin.POST("/order/:id/delete", h.HandleOrderDelete)
 
 	}
 
