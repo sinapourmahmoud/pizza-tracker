@@ -1,7 +1,9 @@
 package main
 
 import (
+	"log/slog"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -24,7 +26,7 @@ func (h *Handler) HandleLoginPost(c *gin.Context) {
 
 	var form struct {
 		Username string `form:"username" binding:"required,min=3,max=50"`
-		Password string `form:"username" binding:"required,min,max="`
+		Password string `form:"password" binding:"required,min=8,max=50"`
 	}
 
 	if err := c.ShouldBind(&form); err != nil {
@@ -35,15 +37,29 @@ func (h *Handler) HandleLoginPost(c *gin.Context) {
 	user, err := h.users.AuthenticateUser(form.Username, form.Password)
 
 	if err != nil {
+		slog.Info("login failed", "username", form.Username, "error", err)
 		c.HTML(http.StatusOK, "login.tmpl", LoginData{
 			Error: "Invalid Credentials",
 		})
 
 		return
 	}
+	slog.Info("login successful", "userID", user.ID, "username", user.Username)
 
-	SetSessionValue(c, "userID", user.ID)
-	SetSessionValue(c, "username", user.Username)
+	err = SetSessionValue(c, "userID", strconv.FormatUint(uint64(user.ID), 10))
+	if err != nil {
+		slog.Error("failed to save userID session", "error", err)
+		return
+	}
+
+	err = SetSessionValue(c, "username", user.Username)
+	if err != nil {
+		slog.Error("failed to save username session", "error", err)
+		return
+	}
+
+	slog.Info("session saved")
+
 	c.Redirect(http.StatusSeeOther, "/admin")
 
 }
@@ -58,16 +74,12 @@ func (h *Handler) HandleLogout(c *gin.Context) {
 	c.Redirect(http.StatusSeeOther, "/login")
 }
 
+func (h *Handler) ServeAdminDashboard(c *gin.Context) {
 
-func (h *Handler) ServeAdminDashboard(c *gin.Context){
+	username := GetSessionString(c, "username")
 
-	username := GetSessionString(c,"username")
-
-	c.HTML(http.StatusOK,"admin.tmpl",AdminDashboardData{
+	c.HTML(http.StatusOK, "admin.tmpl", AdminDashboardData{
 		Username: username,
 	})
 
-
 }
-
-

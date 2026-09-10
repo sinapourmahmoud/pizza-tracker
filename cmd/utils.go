@@ -2,7 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"html/template"
+	"log/slog"
+	"net/http"
 	"os"
 
 	"github.com/gin-contrib/sessions"
@@ -61,13 +64,13 @@ func loadTemplates(router *gin.Engine) error {
 
 func SetupSessionStore(db *gorm.DB, secretKey []byte) sessions.Store {
 
-	store := gormsessions.NewStore(db, true)
+	store := gormsessions.NewStore(db, true, secretKey)
 	store.Options(sessions.Options{
 		Path:     "/",
 		MaxAge:   86400,
 		HttpOnly: true,
-		Secure:   true,
-		SameSite: 3,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
 	})
 
 	return store
@@ -94,7 +97,13 @@ func GetSessionString(c *gin.Context, key string) string {
 		return ""
 	}
 
-	str, _ := val.(string)
+	str, ok := val.(string)
+	if !ok {
+		slog.Info("session value is not a string",
+			"type", fmt.Sprintf("%T", val),
+		)
+		return ""
+	}
 
 	return str
 

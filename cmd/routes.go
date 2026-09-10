@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/sessions"
 )
 
 func setupRoutes(router *gin.Engine, h *Handler, store sessions.Store) {
@@ -16,7 +15,7 @@ func setupRoutes(router *gin.Engine, h *Handler, store sessions.Store) {
 
 	router.GET("/login", h.HandlerLoginGet)
 	router.POST("/login", h.HandleLoginPost)
-	router.POST("/login", h.HandleLogout)
+	router.POST("/logout", h.HandleLogout)
 
 	admin := router.Group("/admin")
 	admin.Use(h.AuthMiddleware())
