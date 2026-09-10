@@ -3,6 +3,7 @@ package main
 import (
 	"log/slog"
 	"net/http"
+	"pizza-tracker/internal/models"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -13,6 +14,8 @@ type LoginData struct {
 }
 
 type AdminDashboardData struct {
+	Orders   []models.Order
+	Statuses []string
 	Username string
 }
 
@@ -75,10 +78,20 @@ func (h *Handler) HandleLogout(c *gin.Context) {
 }
 
 func (h *Handler) ServeAdminDashboard(c *gin.Context) {
+	orders, err := h.orders.GetAllOrders()
+
+	if err != nil {
+
+		c.String(http.StatusInternalServerError, "Error fetching orders")
+		return
+
+	}
 
 	username := GetSessionString(c, "username")
 
 	c.HTML(http.StatusOK, "admin.tmpl", AdminDashboardData{
+		Orders:   orders,
+		Statuses: models.OrderStatuses,
 		Username: username,
 	})
 
